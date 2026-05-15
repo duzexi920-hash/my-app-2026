@@ -283,6 +283,25 @@ textarea:focus {
     margin-top: 40px;
     display: flex;
     justify-content: flex-end;
+    gap: 15px;
+}
+
+.btn-action {
+    background: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: var(--transition);
+}
+
+.btn-action:hover {
+    background: var(--accent-color);
+    color: #121212;
 }
 
 .btn-delete {

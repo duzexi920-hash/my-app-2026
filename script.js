@@ -72,6 +72,7 @@ function displayEntries() {
     journalEntries.forEach(entry => {
         const entryEl = document.createElement('div');
         entryEl.classList.add('journal-entry');
+        entryEl.id = `entry-${entry.id}`;
         entryEl.innerHTML = `
             <div class="entry-poster">
                 <img src="${entry.poster}" alt="${entry.title}">
@@ -83,6 +84,7 @@ function displayEntries() {
                 </div>
                 <div class="entry-thoughts">${entry.thoughts}</div>
                 <div class="entry-footer">
+                    <button class="btn-action" onclick="exportEntry(${entry.id})">画像で保存</button>
                     <button class="btn-delete" onclick="deleteEntry(${entry.id})">記憶を消去</button>
                 </div>
             </div>
@@ -100,41 +102,36 @@ window.deleteEntry = function(id) {
     }
 };
 
-// Export as Image
-exportBtn.addEventListener('click', function() {
-    if (journalEntries.length === 0) {
-        alert('書き出す記録がありません。');
-        return;
-    }
+// Export Individual Entry as Image
+window.exportEntry = function(id) {
+    const entryEl = document.getElementById(`entry-${id}`);
+    const actionButtons = entryEl.querySelectorAll('.entry-footer button');
+    
+    // Temporarily hide buttons for a clean export
+    actionButtons.forEach(btn => btn.style.opacity = '0');
 
-    const originalBtnText = exportBtn.innerText;
-    exportBtn.innerText = '書き出し中...';
-    exportBtn.disabled = true;
-
-    // Hide delete buttons temporarily for a clean export
-    const deleteButtons = document.querySelectorAll('.btn-delete');
-    deleteButtons.forEach(btn => btn.style.display = 'none');
-
-    html2canvas(exportContainer, {
-        backgroundColor: '#121212',
-        scale: 2, // High quality
+    html2canvas(entryEl, {
+        backgroundColor: '#1e1e1e',
+        scale: 2,
         useCORS: true,
-        logging: false
+        logging: false,
+        borderRadius: 20
     }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `movie-journal-${Date.now()}.png`;
+        link.download = `movie-review-${id}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
         // Restore UI
-        exportBtn.innerText = originalBtnText;
-        exportBtn.disabled = false;
-        deleteButtons.forEach(btn => btn.style.display = 'block');
+        actionButtons.forEach(btn => btn.style.opacity = '');
     }).catch(err => {
         console.error('Export failed:', err);
         alert('画像の書き出しに失敗しました。');
-        exportBtn.innerText = originalBtnText;
-        exportBtn.disabled = false;
-        deleteButtons.forEach(btn => btn.style.display = 'block');
+        actionButtons.forEach(btn => btn.style.opacity = '');
     });
-});
+};
+
+// Remove the global export button logic (optional, keeping it in HTML for now or removing if requested)
+if (exportBtn) {
+    exportBtn.style.display = 'none'; // Hide the "all" export button as requested
+}
