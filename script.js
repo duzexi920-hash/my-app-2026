@@ -1,83 +1,96 @@
-// TMDB API Settings (APIキーは後ほどユーザーが設定)
-const API_KEY = 'YOUR_TMDB_API_KEY_HERE';
-const BASE_URL = 'https://api.themoviedb.org/3';
-const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+const journalForm = document.getElementById('journal-form');
+const movieTitleInput = document.getElementById('movie-title');
+const moviePosterInput = document.getElementById('movie-poster');
+const movieThoughtsInput = document.getElementById('movie-thoughts');
+const imagePreview = document.getElementById('image-preview');
+const journalList = document.getElementById('journal-list');
 
-const movieGrid = document.getElementById('movie-grid');
-const searchForm = document.getElementById('search-form');
-const searchInput = document.getElementById('search-input');
-const sectionTitle = document.getElementById('section-title');
+let journalEntries = JSON.parse(localStorage.getItem('movieJournalEntries')) || [];
 
-// 初期表示: トレンド映画を取得
-getTrendingMovies();
+// 初期化: 既存の記録を表示
+displayEntries();
 
-async function getTrendingMovies() {
-    try {
-        const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}&language=ja-JP`);
-        const data = await res.json();
-        
-        if (data.results) {
-            displayMovies(data.results);
-        } else {
-            movieGrid.innerHTML = '<p class="loader">映画が見つかりませんでした。APIキーを確認してください。</p>';
-        }
-    } catch (error) {
-        console.error('Error fetching trending movies:', error);
-        movieGrid.innerHTML = '<p class="loader">エラーが発生しました。しばらくしてからお試しください。</p>';
+// 画像プレビューの処理
+moviePosterInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        imagePreview.innerHTML = '<span>プレビュー画像がここに表示されます</span>';
     }
+});
+
+// フォーム送信時の処理
+journalForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const title = movieTitleInput.value;
+    const thoughts = movieThoughtsInput.value;
+    const file = moviePosterInput.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const posterData = e.target.result;
+            const newEntry = {
+                id: Date.now(),
+                title: title,
+                poster: posterData,
+                thoughts: thoughts,
+                date: new Date().toLocaleDateString('ja-JP')
+            };
+
+            journalEntries.unshift(newEntry);
+            saveToLocalStorage();
+            displayEntries();
+            journalForm.reset();
+            imagePreview.innerHTML = '<span>プレビュー画像がここに表示されます</span>';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ローカルストレージに保存
+function saveToLocalStorage() {
+    localStorage.setItem('movieJournalEntries', JSON.stringify(journalEntries));
 }
 
-async function searchMovies(query) {
-    try {
-        movieGrid.innerHTML = '<div class="loader">検索中...</div>';
-        const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&language=ja-JP`);
-        const data = await res.json();
-        
-        if (data.results && data.results.length > 0) {
-            displayMovies(data.results);
-        } else {
-            movieGrid.innerHTML = '<p class="loader">該当する映画が見つかりませんでした。</p>';
-        }
-    } catch (error) {
-        console.error('Error searching movies:', error);
-        movieGrid.innerHTML = '<p class="loader">エラーが発生しました。</p>';
+// 記録の表示
+function displayEntries() {
+    if (journalEntries.length === 0) {
+        journalList.innerHTML = '<p class="empty-msg">まだ記録がありません。上のフォームから追加してください。</p>';
+        return;
     }
-}
 
-function displayMovies(movies) {
-    movieGrid.innerHTML = '';
-
-    movies.forEach(movie => {
-        const { title, poster_path, vote_average, release_date } = movie;
-        const movieEl = document.createElement('div');
-        movieEl.classList.add('movie-card');
-
-        const poster = poster_path ? IMG_URL + poster_path : 'https://via.placeholder.com/300x450?text=No+Image';
-
-        movieEl.innerHTML = `
-            <img src="${poster}" alt="${title}">
-            <div class="movie-info">
-                <h3>${title}</h3>
-                <div class="rating">
-                    <span>★ ${vote_average.toFixed(1)}</span>
-                    <small>${release_date ? release_date.split('-')[0] : '不明'}</small>
+    journalList.innerHTML = '';
+    journalEntries.forEach(entry => {
+        const entryEl = document.createElement('div');
+        entryEl.classList.add('journal-entry');
+        entryEl.innerHTML = `
+            <div class="entry-poster">
+                <img src="${entry.poster}" alt="${entry.title}">
+            </div>
+            <div class="entry-content">
+                <h3>${entry.title} <small style="font-size: 0.8rem; color: var(--text-secondary); float: right;">${entry.date}</small></h3>
+                <div class="entry-thoughts">${entry.thoughts}</div>
+                <div class="entry-footer">
+                    <button class="btn-delete" onclick="deleteEntry(${entry.id})">削除</button>
                 </div>
             </div>
         `;
-
-        movieGrid.appendChild(movieEl);
+        journalList.appendChild(entryEl);
     });
 }
 
-searchForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchTerm = searchInput.value;
-
-    if (searchTerm && searchTerm !== '') {
-        searchMovies(searchTerm);
-        sectionTitle.textContent = `「${searchTerm}」の検索結果`;
-        searchInput.value = '';
-    } else {
-        window.location.reload();
+// 記録の削除
+window.deleteEntry = function(id) {
+    if (confirm('この記録を削除してもよろしいですか？')) {
+        journalEntries = journalEntries.filter(entry => entry.id !== id);
+        saveToLocalStorage();
+        displayEntries();
     }
-});
+};
