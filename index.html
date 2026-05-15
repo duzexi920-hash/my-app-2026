@@ -3,56 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Movie Journal</title>
+    <title>Aesthetic Movie Journal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Aesthetic Typography: Montserrat for UI, Playfair Display for Content -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- html2canvas-pro for high quality exports -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.2/dist/html2canvas-pro.min.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
             <h1 id="logo">Movie<span>Journal</span></h1>
+            <div class="header-actions">
+                <button id="export-btn" class="btn-outline">画像を保存</button>
+            </div>
         </div>
     </header>
 
     <main class="container">
         <section id="entry-section">
             <div class="card form-card">
-                <h2>新しい記録を追加</h2>
+                <h2>記録を綴る</h2>
                 <form id="journal-form">
-                    <div class="form-group">
-                        <label for="movie-title">映画タイトル</label>
-                        <input type="text" id="movie-title" placeholder="映画の名前を入力..." required>
-                    </div>
-                    <div class="form-group">
-                        <label for="movie-poster">ポスター画像</label>
-                        <input type="file" id="movie-poster" accept="image/*" required>
-                        <div id="image-preview" class="image-preview">
-                            <span>プレビュー画像がここに表示されます</span>
+                    <div class="form-row">
+                        <div class="form-group poster-upload">
+                            <label for="movie-poster">ポスターを選択</label>
+                            <input type="file" id="movie-poster" accept="image/*" required>
+                            <div id="image-preview" class="image-preview">
+                                <span>画像を選択してください</span>
+                            </div>
+                        </div>
+                        <div class="form-group inputs-group">
+                            <label for="movie-title">作品名</label>
+                            <input type="text" id="movie-title" placeholder="映画のタイトル..." required>
+                            
+                            <label for="movie-thoughts">記憶の断片</label>
+                            <textarea id="movie-thoughts" rows="8" placeholder="この作品を観て、何を感じましたか？" required></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="movie-thoughts">感想・メモ</label>
-                        <textarea id="movie-thoughts" rows="5" placeholder="映画を観た感想を自由に書いてください..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary">ジャーナルに保存</button>
+                    <button type="submit" class="btn-primary">ジャーナルに刻む</button>
                 </form>
             </div>
         </section>
 
         <section id="journal-section">
-            <h2 id="section-title">私の観影記録</h2>
-            <div id="journal-list" class="journal-list">
-                <!-- 記録がここに動的に追加されます -->
-                <p class="empty-msg">まだ記録がありません。上のフォームから追加してください。</p>
+            <h2 id="section-title">私の鑑賞録</h2>
+            <div id="export-container">
+                <div id="journal-list" class="journal-list">
+                    <!-- 記録がここに動的に追加されます -->
+                    <p class="empty-msg">まだ物語が綴られていません。</p>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 My Movie Journal App.</p>
+            <p>&copy; 2026 Aesthetic Movie Journal. Keep your memories alive.</p>
         </div>
     </footer>
 
